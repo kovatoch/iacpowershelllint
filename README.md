@@ -1,1 +1,1 @@
-# iacpowershelllint
+# iacshellcheck

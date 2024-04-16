@@ -1,0 +1,51 @@
+
+name: Self Hosted Runner
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Show workdir
+        run:
+          echo "${{ github.workspace }}"
+
+      - name: Run Linting
+        run: |
+          echo ${{ github.workspace }}/stop_minumum.sh
+          cat ${{ github.workspace }}/stop_minumum.sh
+
+          for file in *.sh; do
+            if ! podman run --rm --privileged -v ${{ github.workspace }}/$file:/script.sh testshellcheck /script.sh > ${{ github.workspace }}/${file}_output.txt; then
+              echo "Linting NOT succeded"
+            fi
+
+            # Use script to determine if a PR should be created (exit 0 to create PR, exit 1 to skip PR creation)
+            expected_text="Linting /script.sh"
+
+            # Use `cat` to read the contents of the file
+            file_contents=$(cat "${{ github.workspace }}/${file}_output.txt")
+
+
+
+            echo $file_contents
+            echo $expected_text
+
+            # Check if the file contents match the expected text
+            if [ "$file_contents" = "$expected_text" ]; then
+              echo "Linting succeced"
+            else
+              echo "Linting NOT succeced"
+            fi  
+          done
+
+
+          
+          
